@@ -1,0 +1,29 @@
+Practical Machine Learning Project - Course Project assignment
+========================================================
+
+
+
+```{r}
+library(caret)
+library(randomForest)
+trainData <- read.csv("./data/pml-training.csv")
+testData <- read.csv("./data/pml-testing.csv")
+trainData <- trainData[, colSums(is.na(trainData)) == 0] 
+testData <- testData[, colSums(is.na(testData)) == 0] 
+trainData <- trainData[, !grepl("X|user|timestamp|window", names(trainData))]
+trainReduced <- trainData[, sapply(trainData, is.numeric)]
+trainReduced$classe <- trainData$classe
+testData <- testData[, !grepl("X|user|timestamp|window", names(testData))]
+testReduced <- testData[, sapply(testData, is.numeric)]
+set.seed(1) 
+cvTrain <- createDataPartition(trainReduced$classe, p=0.70, list=F)
+trainData <- trainReduced[cvTrain, ]
+testData <- trainReduced[-cvTrain, ]
+model <- train(classe ~ ., data=trainData, method="rf", trControl=trainControl(method="cv", 3), ntree=20)
+predict <- predict(model, testData)
+accuracy <- postResample(predict, testData$classe)
+accuracy
+result <- predict(model, testReduced[, -length(names(testReduced))])
+result
+```
+

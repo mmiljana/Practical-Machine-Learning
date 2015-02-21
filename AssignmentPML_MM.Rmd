@@ -1,0 +1,89 @@
+Practical Machine Learning Project - Course Project assignment
+========================================================
+1. Load packages
+```{r}
+library(caret)
+library(randomForest)
+```
+
+
+2. Read data frames
+
+```{r}
+trainData <- read.csv("./data/pml-training.csv")
+testData <- read.csv("./data/pml-testing.csv")
+```
+
+3. Reduce feature space
+
+Reduce training and testing frames by removing columns with missing or NA or meaningless values.
+
+3a. Use is.na(trainData) to detect NA value columns and remove them from datasets</br>
+```{r}
+trainData <- trainData[, colSums(is.na(trainData)) == 0] 
+testData <- testData[, colSums(is.na(testData)) == 0] 
+```
+
+3b. Use grepl function to detect and remove from datasets all columns that contain 
+"user", "timestamp" or "window" like columns: "user_name", "raw_timestamp_part_1",
+"raw_timestamp_part_2","cvtd_timestamp", "new_window","num_window", etc.
+```{r}
+trainData <- trainData[, !grepl("X|user|timestamp|window", names(trainData))]
+testData <- testData[, !grepl("X|user|timestamp|window", names(testData))]
+```
+
+3c. Check if the rest of columns are not dummy variables.
+```{r}
+trainReduced <- trainData[, sapply(trainData, is.numeric)]
+testReduced <- testData[, sapply(testData, is.numeric)]
+```
+
+4. Prepare data for cross validation
+
+Preparing of 3-fold cross validation
+```{r}
+trainControl(method="cv", 3)
+cvTrain <- createDataPartition(trainReduced$classe, p=0.70, list=F)
+trainData <- trainReduced[cvTrain, ]
+testData <- trainReduced[-cvTrain, ]
+```
+
+5. Generate model
+
+Generate Random Forests model
+```{r}
+model <- train(classe ~ ., data=trainData, method="rf", trControl=trainControl(method="cv", 3), ntree=20)
+```
+
+
+6. Validate model
+
+Use test dataset for validation
+```{r}
+predict <- predict(model, testData)
+```
+
+7. See what you done 
+
+Calculate accuracy
+```{r}
+accuracy <- postResample(predict, testData$classe)
+accuracy
+```
+
+and get values of "classe" variable predicted by the model
+```{r}
+result <- predict(model, testReduced[, -length(names(testReduced))])
+result
+```
+
+If you need graphs, use extra packages to plot...
+
+8. Project Results
+
+ Accuracy     Kappa 
+0.9925234    0.9905413 
+
+result 
+[1] B A B A A E D B A A B C B A E E A B B B
+Levels: A B C D E
