@@ -1,21 +1,13 @@
 ﻿<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-
 <meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="author" content="Miljana Mladenović" />
 <title>Practical Machine Learning Project - Course Project assignment</title>
 </head>
-
 <body>
-
-
-
 <h2>Practical Machine Learning - Course Project assignment</h2>
-
 <h3>Read data frames</h3>
 1. Read the two csv files into training and testing data frames.
 <pre>
@@ -23,17 +15,15 @@ trainData <- read.csv("./data/pml-training.csv")
 testData <- read.csv("./data/pml-testing.csv")
 </pre>
 </br>
-
 <h3>Reduce feature space</h3>
 2. Reduce training and testing frames by removing columns with missing or NA or meaningless values.
 </br>
-
 2a. Use is.na(trainData) to detect NA value columns and remove them from datasets</br>
 <pre>
-trainData <- trainData[, colSums(is.na(trainData)) == 0] 
-testData <- testData[, colSums(is.na(testData)) == 0] 
+trainData <- trainData[, colSums(is.na(trainData)) == 0]
+testData <- testData[, colSums(is.na(testData)) == 0]
 </pre>
-2b. Use grepl function to detect and remove from datasets all columns that contain 
+2b. Use grepl function to detect and remove from datasets all columns that contain
 "user", "timestamp" or "window" like columns: "user_name", "raw_timestamp_part_1",
 "raw_timestamp_part_2","cvtd_timestamp", "new_window","num_window", etc.
 <pre>
@@ -69,7 +59,7 @@ predict <- predict(model, testData)
 </pre>
 </br>
 <h3>See what you done </h3>
-6. Calculate accuracy 
+6. Calculate accuracy
 <pre>
 accuracy <- postResample(predict, testData$classe)
 accuracy
@@ -79,22 +69,34 @@ and get values of "classe" variable predicted by the model
 <pre>
 result <- predict(model, testReduced[, -length(names(testReduced))])
 result
-
 If you need graphs, use extra packages to plot...
 </pre>
 </br>
 <h3>Project Results</h3>
-
 <pre>
- Accuracy     Kappa 
-0.9925234    0.9905413 
-
-result 
-[1] B A B A A E D B A A B C B A E E A B B B
-Levels: A B C D E
+Accuracy Kappa
+0.9925234 0.9905413
 </pre>
 
 
+<h3>Make project submission text files</h3>
 
+And finally, if you want to make "project submission" text files,
+create subfolder "submit_results" (for example) and use it in the next code.</br>
+Put this code at the end of the R file.
+
+<pre>
+answers <- result
+
+pml_write_files <- function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("submit_results/problem_id_",i,".txt")
+    write.table(x[i], file=filename, quote=FALSE,
+                row.names=FALSE, col.names=FALSE)
+  }
+}
+pml_write_files(answers)
+</pre>
 </body>
 </html>
